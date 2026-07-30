@@ -1,4 +1,6 @@
-\# Content Parser API
+```
+
+\#Content Parser API
 
 
 
@@ -28,7 +30,7 @@ Projekt został przygotowany z myślą o łatwej rozbudowie o kolejne formaty da
 
 
 
-\# 🚀 Technologie
+\#🚀 Technologie
 
 
 
@@ -54,7 +56,7 @@ Projekt został przygotowany z myślą o łatwej rozbudowie o kolejne formaty da
 
 
 
-\# 🏗️ Struktura projektu
+\#🏗️ Struktura projektu
 
 
 
@@ -86,7 +88,7 @@ Api
 
 
 
-\# 🔄 Przepływ działania aplikacji
+\#🔄 Przepływ działania aplikacji
 
 
 
@@ -132,11 +134,11 @@ Response HTTP
 
 
 
-\# 🧩 Architektura
+\#🧩 Architektura
 
 
 
-\## Content Decoder
+\##Content Decoder
 
 
 
@@ -949,4 +951,6 @@ Istniejący endpoint nie wymaga żadnych zmian.
 
 
 Projekt przygotowany jako implementacja generycznego parsera danych przesyłanych przez API w technologii .NET 10.
+
+```
 

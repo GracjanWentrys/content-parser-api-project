@@ -133,73 +133,105 @@ CsvContentParser
 
 ------------------------------------------------------------------------
 
+---
+
 # 🎯 Zastosowane wzorce projektowe
 
 ## Strategy Pattern
 
-``` text
+Każdy format danych posiada własną strategię parsowania.
+
+Przykład:
+
+```text
              IContentParser
                    │
-      ┌────────────┴────────────┐
-      │                         │
+        ┌──────────┴──────────┐
+        │                     │
 CsvContentParser   InternalJsonContentParser
 ```
 
-Każdy format danych posiada własną strategię parsowania.
+Pozwala to dodawać kolejne formaty bez modyfikowania istniejącego kodu.
+
+---
 
 ## Factory Pattern
 
-Factory ukrywa logikę wyboru parsera.
+Factory ukrywa logikę wyboru odpowiedniego parsera.
 
-------------------------------------------------------------------------
+Dzięki temu endpoint pozostaje prosty i odpowiada jedynie za przepływ danych.
+
+---
 
 # 🚀 Wymagania
 
--   .NET 10 SDK
+Do uruchomienia projektu wymagane jest:
 
-``` bash
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+
+Sprawdzenie wersji:
+
+```bash
 dotnet --version
 ```
 
-------------------------------------------------------------------------
+---
 
 # 🛠️ Uruchomienie lokalne
 
 ## 1. Sklonowanie repozytorium
 
-``` bash
+```bash
 git clone https://github.com/GracjanWentrys/content-parser-api.git
+
 cd content-parser-api
 ```
 
+---
+
 ## 2. Przywrócenie zależności
 
-``` bash
+```bash
 dotnet restore
 ```
 
-## 3. Uruchomienie
+---
 
-``` bash
+## 3. Uruchomienie aplikacji
+
+Z głównego katalogu rozwiązania:
+
+```bash
 dotnet run --project Api
 ```
 
-lub
+lub będąc bezpośrednio w katalogu projektu:
 
-``` bash
+```bash
 dotnet run
 ```
 
-------------------------------------------------------------------------
+---
 
 # 📚 Dokumentacja API
 
-``` text
+Projekt wykorzystuje wbudowaną obsługę OpenAPI w ASP.NET Core oraz Scalar API Reference.
+
+Po uruchomieniu aplikacji:
+
+Dokument OpenAPI:
+
+```text
 https://localhost:<port>/openapi/v1.json
+```
+
+Interaktywna dokumentacja Scalar:
+
+```text
 https://localhost:<port>/scalar/v1
 ```
 
-------------------------------------------------------------------------
+---
 
 # 📌 Endpoint API
 
@@ -207,49 +239,71 @@ https://localhost:<port>/scalar/v1
 
 Dekoduje zawartość Base64 i parsuje dane zgodnie z podanym typem.
 
-------------------------------------------------------------------------
+---
 
 # 📥 Przykładowy request
 
-``` http
+Nagłówki:
+
+```http
 Content-Type: application/json
 ```
 
 ## CSV
 
-``` json
+Request:
+
+```json
 {
   "type": "CSV",
   "content": "TmFtZSxBZ2UKSm9obiwzMA=="
 }
 ```
 
-``` csv
+Po dekodowaniu:
+
+```csv
 Name,Age
 John,30
 ```
 
+---
+
 ## INTERNAL_JSON
 
-``` json
+Request:
+
+```json
 {
   "type": "INTERNAL_JSON",
   "content": "W3sibmFtZSI6IkpvaG4iLCJhZ2UiOjMwfV0="
 }
 ```
 
-``` json
+Po dekodowaniu:
+
+```json
 [
   {
-    "name":"John",
-    "age":30
+    "name": "John",
+    "age": 30
   }
 ]
 ```
 
-# ✅ Przykładowa odpowiedź
+---
 
-``` json
+# ✅ Przykładowa odpowiedź poprawna
+
+Status:
+
+```text
+200 OK
+```
+
+Response:
+
+```json
 {
   "isSuccess": true,
   "recordCount": 1,
@@ -263,11 +317,25 @@ John,30
 }
 ```
 
+---
+
 # ❌ Obsługa błędów
+
+API posiada globalną obsługę wyjątków poprzez middleware.
+
+---
 
 ## Niepoprawny Base64
 
-``` json
+Status:
+
+```text
+400 Bad Request
+```
+
+Przykład:
+
+```json
 {
   "isSuccess": false,
   "recordCount": 0,
@@ -276,9 +344,19 @@ John,30
 }
 ```
 
+---
+
 ## Niepoprawny JSON requestu
 
-``` json
+Status:
+
+```text
+400 Bad Request
+```
+
+Przykład:
+
+```json
 {
   "isSuccess": false,
   "recordCount": 0,
@@ -287,9 +365,19 @@ John,30
 }
 ```
 
+---
+
 ## Nieobsługiwany typ danych
 
-``` json
+Status:
+
+```text
+400 Bad Request
+```
+
+Przykład:
+
+```json
 {
   "isSuccess": false,
   "recordCount": 0,
@@ -298,9 +386,19 @@ John,30
 }
 ```
 
+---
+
 ## Błąd parsowania danych
 
-``` json
+Status:
+
+```text
+422 Unprocessable Entity
+```
+
+Przykład:
+
+```json
 {
   "isSuccess": false,
   "recordCount": 0,
@@ -309,9 +407,15 @@ John,30
 }
 ```
 
+---
+
 # ➕ Dodanie nowego parsera
 
-``` csharp
+Aby dodać nowy format danych, np. XML:
+
+## 1. Utworzyć nową implementację
+
+```csharp
 public class XmlContentParser : IContentParser
 {
     public ContentType SupportedType => ContentType.XML;
@@ -323,7 +427,11 @@ public class XmlContentParser : IContentParser
 }
 ```
 
-``` csharp
+---
+
+## 2. Dodać nową wartość enum
+
+```csharp
 public enum ContentType
 {
     CSV,
@@ -332,29 +440,32 @@ public enum ContentType
 }
 ```
 
-``` csharp
+---
+
+## 3. Zarejestrować parser
+
+```csharp
 builder.Services.AddSingleton<IContentParser, XmlContentParser>();
 ```
 
+Istniejący endpoint nie wymaga żadnych zmian.
+
+---
+
 # 📝 Podjęte decyzje projektowe
 
--   Parsery zostały oddzielone od endpointu dzięki zastosowaniu
-    interfejsu `IContentParser`.
--   Factory odpowiada za wybór parsera.
--   Dependency Injection zarządza zależnościami aplikacji.
--   Globalny middleware obsługuje wyjątki i zapewnia spójny format
-    błędów.
--   CSV jest parsowany przy użyciu `TextFieldParser`, aby poprawnie
-    obsługiwać:
-    -   wartości w cudzysłowach,
-    -   przecinki w polach,
-    -   wartości wieloliniowe.
--   JSON jest obsługiwany dynamicznie poprzez `JsonElement`, ponieważ
-    struktura danych nie jest wcześniej znana.
+- Parsery zostały oddzielone od endpointu dzięki zastosowaniu interfejsu `IContentParser`.
+- Factory odpowiada za wybór odpowiedniego parsera.
+- Dependency Injection zarządza zależnościami aplikacji.
+- Globalny middleware obsługuje wyjątki i zapewnia spójny format błędów.
+- CSV jest parsowany przy użyciu `TextFieldParser`, aby poprawnie obsługiwać:
+  - wartości w cudzysłowach,
+  - przecinki w polach,
+  - wartości wieloliniowe.
+- JSON jest obsługiwany dynamicznie poprzez `JsonElement`, ponieważ struktura danych nie jest wcześniej znana.
 
-------------------------------------------------------------------------
+---
 
 # 📄 Licencja
 
-Projekt przygotowany jako implementacja generycznego parsera danych
-przesyłanych przez API w technologii .NET 10.
+Projekt przygotowany jako implementacja generycznego parsera danych przesyłanych przez API w technologii .NET 10.

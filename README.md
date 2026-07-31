@@ -118,708 +118,243 @@ implementującej `IContentParser`.
 
 ### Content Parser Factory
 
-Klasa:
-
 ``` csharp
 ContentParserFactory
 ```
 
-Odpowiada za wybór odpowiedniego parsera na podstawie wartości
-`ContentType`.
-
-Przykład:
+Odpowiada za wybór parsera na podstawie `ContentType`.
 
 ``` text
 ContentType.CSV
-       |
-       v
+      │
+      ▼
 CsvContentParser
 ```
 
-Endpoint API nie musi znać szczegółów implementacji parserów.
+------------------------------------------------------------------------
 
+# 🎯 Zastosowane wzorce projektowe
 
-\---
+## Strategy Pattern
 
-
-
-\# 🎯 Zastosowane wzorce projektowe
-
-
-
-\## Strategy Pattern
-
-
+``` text
+             IContentParser
+                   │
+      ┌────────────┴────────────┐
+      │                         │
+CsvContentParser   InternalJsonContentParser
+```
 
 Każdy format danych posiada własną strategię parsowania.
 
+## Factory Pattern
 
+Factory ukrywa logikę wyboru parsera.
 
-Przykład:
+------------------------------------------------------------------------
 
+# 🚀 Wymagania
 
+-   .NET 10 SDK
 
-```
-
-&#x20;             IContentParser
-
-
-
-&#x20;                   |
-
-&#x20;       -------------------------
-
-&#x20;       |                       |
-
-&#x20;CsvContentParser    InternalJsonContentParser
-
-```
-
-
-
-Pozwala to dodawać kolejne formaty bez modyfikowania istniejącego kodu.
-
-
-
-\---
-
-
-
-\## Factory Pattern
-
-
-
-Factory ukrywa logikę wyboru odpowiedniego parsera.
-
-
-
-Dzięki temu endpoint pozostaje prosty i odpowiada jedynie za przepływ danych.
-
-
-
-\---
-
-
-
-\# 🚀 Wymagania
-
-
-
-Do uruchomienia projektu wymagane jest:
-
-
-
-\- \[.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-
-
-
-Sprawdzenie wersji:
-
-
-
-```bash
-
+``` bash
 dotnet --version
-
 ```
 
+------------------------------------------------------------------------
 
+# 🛠️ Uruchomienie lokalne
 
-\---
+## 1. Sklonowanie repozytorium
 
-
-
-\# 🛠️ Uruchomienie lokalne
-
-
-
-\## 1. Sklonowanie repozytorium
-
-
-
-```bash
-
+``` bash
 git clone https://github.com/GracjanWentrys/content-parser-api.git
-
-
-
 cd content-parser-api
-
 ```
 
+## 2. Przywrócenie zależności
 
-
-\---
-
-
-
-\## 2. Przywrócenie zależności
-
-
-
-```bash
-
+``` bash
 dotnet restore
-
 ```
 
+## 3. Uruchomienie
 
-
-\---
-
-
-
-\## 3. Uruchomienie aplikacji
-
-
-
-Z głównego katalogu rozwiązania:
-
-
-
-```bash
-
+``` bash
 dotnet run --project Api
-
 ```
 
+lub
 
-
-lub będąc bezpośrednio w katalogu projektu:
-
-
-
-```bash
-
+``` bash
 dotnet run
-
 ```
 
+------------------------------------------------------------------------
 
+# 📚 Dokumentacja API
 
-\---
-
-
-
-\# 📚 Dokumentacja API
-
-
-
-Projekt wykorzystuje wbudowaną obsługę OpenAPI w ASP.NET Core oraz Scalar API Reference.
-
-
-
-Po uruchomieniu aplikacji:
-
-
-
-Dokument OpenAPI:
-
-
-
-```
-
+``` text
 https://localhost:<port>/openapi/v1.json
-
-```
-
-
-
-Interaktywna dokumentacja Scalar:
-
-
-
-```
-
 https://localhost:<port>/scalar/v1
-
 ```
 
+------------------------------------------------------------------------
 
+# 📌 Endpoint API
 
-\---
-
-
-
-\# 📌 Endpoint API
-
-
-
-\## POST `/api/v1/parse-content`
-
-
+## POST `/api/v1/parse-content`
 
 Dekoduje zawartość Base64 i parsuje dane zgodnie z podanym typem.
 
+------------------------------------------------------------------------
 
+# 📥 Przykładowy request
 
-\---
-
-
-
-\# 📥 Przykładowy request
-
-
-
-Nagłówki:
-
-
-
-```http
-
+``` http
 Content-Type: application/json
-
 ```
 
+## CSV
 
-
-\---
-
-
-
-\## CSV
-
-
-
-Request:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "type": "CSV",
-
-&#x20; "content": "TmFtZSxBZ2UKSm9obiwzMA=="
-
+  "type": "CSV",
+  "content": "TmFtZSxBZ2UKSm9obiwzMA=="
 }
-
 ```
 
-
-
-Po dekodowaniu:
-
-
-
-```csv
-
+``` csv
 Name,Age
-
 John,30
-
 ```
 
+## INTERNAL_JSON
 
-
-\---
-
-
-
-\## INTERNAL\_JSON
-
-
-
-Request:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "type": "INTERNAL\_JSON",
-
-&#x20; "content": "W3sibmFtZSI6IkpvaG4iLCJhZ2UiOjMwfV0="
-
+  "type": "INTERNAL_JSON",
+  "content": "W3sibmFtZSI6IkpvaG4iLCJhZ2UiOjMwfV0="
 }
-
 ```
 
-
-
-Po dekodowaniu:
-
-
-
-```json
-
-\[
-
-&#x20; {
-
-&#x20;   "name": "John",
-
-&#x20;   "age": 30
-
-&#x20; }
-
+``` json
+[
+  {
+    "name":"John",
+    "age":30
+  }
 ]
-
 ```
 
+# ✅ Przykładowa odpowiedź
 
-
-\---
-
-
-
-\# ✅ Przykładowa odpowiedź poprawna
-
-
-
-Status:
-
-
-
-```
-
-200 OK
-
-```
-
-
-
-Response:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "isSuccess": true,
-
-&#x20; "recordCount": 1,
-
-&#x20; "data": \[
-
-&#x20;   {
-
-&#x20;     "Name": "John",
-
-&#x20;     "Age": "30"
-
-&#x20;   }
-
-&#x20; ],
-
-&#x20; "errorMessage": null
-
+  "isSuccess": true,
+  "recordCount": 1,
+  "data": [
+    {
+      "Name": "John",
+      "Age": "30"
+    }
+  ],
+  "errorMessage": null
 }
-
 ```
 
+# ❌ Obsługa błędów
 
+## Niepoprawny Base64
 
-\---
-
-
-
-\# ❌ Obsługa błędów
-
-
-
-API posiada globalną obsługę wyjątków poprzez middleware.
-
-
-
-\---
-
-
-
-\## Niepoprawny Base64
-
-
-
-Status:
-
-
-
-```
-
-400 Bad Request
-
-```
-
-
-
-Przykład:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "isSuccess": false,
-
-&#x20; "recordCount": 0,
-
-&#x20; "data": null,
-
-&#x20; "errorMessage": "Invalid Base64 string in content field."
-
+  "isSuccess": false,
+  "recordCount": 0,
+  "data": null,
+  "errorMessage": "Invalid Base64 string in content field."
 }
-
 ```
 
+## Niepoprawny JSON requestu
 
-
-\---
-
-
-
-\## Niepoprawny JSON requestu
-
-
-
-Status:
-
-
-
-```
-
-400 Bad Request
-
-```
-
-
-
-Przykład:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "isSuccess": false,
-
-&#x20; "recordCount": 0,
-
-&#x20; "data": null,
-
-&#x20; "errorMessage": "Invalid JSON format."
-
+  "isSuccess": false,
+  "recordCount": 0,
+  "data": null,
+  "errorMessage": "Invalid JSON format."
 }
-
 ```
 
+## Nieobsługiwany typ danych
 
-
-\---
-
-
-
-\## Nieobsługiwany typ danych
-
-
-
-Status:
-
-
-
-```
-
-400 Bad Request
-
-```
-
-
-
-Przykład:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "isSuccess": false,
-
-&#x20; "recordCount": 0,
-
-&#x20; "data": null,
-
-&#x20; "errorMessage": "Content type is not supported."
-
+  "isSuccess": false,
+  "recordCount": 0,
+  "data": null,
+  "errorMessage": "Content type is not supported."
 }
-
 ```
 
+## Błąd parsowania danych
 
-
-\---
-
-
-
-\## Błąd parsowania danych
-
-
-
-Status:
-
-
-
-```
-
-422 Unprocessable Entity
-
-```
-
-
-
-Przykład:
-
-
-
-```json
-
+``` json
 {
-
-&#x20; "isSuccess": false,
-
-&#x20; "recordCount": 0,
-
-&#x20; "data": null,
-
-&#x20; "errorMessage": "Invalid JSON structure."
-
+  "isSuccess": false,
+  "recordCount": 0,
+  "data": null,
+  "errorMessage": "Invalid JSON structure."
 }
-
 ```
 
+# ➕ Dodanie nowego parsera
 
-
-\---
-
-
-
-\# ➕ Dodanie nowego parsera
-
-
-
-Aby dodać nowy format danych:
-
-
-
-Przykład: XML
-
-
-
-\## 1. Utworzyć nową implementację:
-
-
-
-```csharp
-
+``` csharp
 public class XmlContentParser : IContentParser
-
 {
+    public ContentType SupportedType => ContentType.XML;
 
-&#x20;   public ContentType SupportedType => ContentType.XML;
-
-
-
-&#x20;   public IParseResult Parse(string rawContent)
-
-&#x20;   {
-
-&#x20;       // Logika parsowania XML
-
-&#x20;   }
-
+    public IParseResult Parse(string rawContent)
+    {
+        // Logika parsowania XML
+    }
 }
-
 ```
 
-
-
-\---
-
-
-
-\## 2. Dodać nową wartość enum:
-
-
-
-```csharp
-
+``` csharp
 public enum ContentType
-
 {
-
-&#x20;   CSV,
-
-&#x20;   INTERNAL\_JSON,
-
-&#x20;   XML
-
+    CSV,
+    INTERNAL_JSON,
+    XML
 }
-
 ```
 
-
-
-\---
-
-
-
-\## 3. Zarejestrować parser:
-
-
-
-```csharp
-
+``` csharp
 builder.Services.AddSingleton<IContentParser, XmlContentParser>();
-
 ```
 
+# 📝 Podjęte decyzje projektowe
 
+-   Parsery zostały oddzielone od endpointu dzięki zastosowaniu
+    interfejsu `IContentParser`.
+-   Factory odpowiada za wybór parsera.
+-   Dependency Injection zarządza zależnościami aplikacji.
+-   Globalny middleware obsługuje wyjątki i zapewnia spójny format
+    błędów.
+-   CSV jest parsowany przy użyciu `TextFieldParser`, aby poprawnie
+    obsługiwać:
+    -   wartości w cudzysłowach,
+    -   przecinki w polach,
+    -   wartości wieloliniowe.
+-   JSON jest obsługiwany dynamicznie poprzez `JsonElement`, ponieważ
+    struktura danych nie jest wcześniej znana.
 
-Istniejący endpoint nie wymaga żadnych zmian.
+------------------------------------------------------------------------
 
+# 📄 Licencja
 
-
-\---
-
-
-
-\# 📝 Podjęte decyzje projektowe
-
-
-
-\- Parsery zostały oddzielone od endpointu dzięki zastosowaniu interfejsu `IContentParser`.
-
-\- Factory odpowiada za wybór odpowiedniego parsera.
-
-\- Dependency Injection zarządza zależnościami aplikacji.
-
-\- Globalny middleware obsługuje wyjątki i zapewnia spójny format błędów.
-
-\- CSV jest parsowany przy użyciu `TextFieldParser`, aby poprawnie obsługiwać:
-
-&#x20; - wartości w cudzysłowach,
-
-&#x20; - przecinki w polach,
-
-&#x20; - wartości wieloliniowe.
-
-\- JSON jest obsługiwany dynamicznie poprzez `JsonElement`, ponieważ struktura danych nie jest wcześniej znana.
-
-
-
-\---
-
-
-
-\# 📄 Licencja
-
-
-
-Projekt przygotowany jako implementacja generycznego parsera danych przesyłanych przez API w technologii .NET 10.
-
-```
-
+Projekt przygotowany jako implementacja generycznego parsera danych
+przesyłanych przez API w technologii .NET 10.

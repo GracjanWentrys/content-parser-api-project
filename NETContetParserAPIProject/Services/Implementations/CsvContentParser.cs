@@ -35,9 +35,16 @@ public class CsvContentParser : IContentParser
             var fields = ParseCsvLine(line);
             var columns = new Dictionary<string, string>();
 
-            for (int i = 0; i < headers.Count; i++)
+            int maxColumns = Math.Max(headers.Count, fields.Count);
+
+            for (int i = 0; i < maxColumns; i++)
             {
-                columns[headers[i]] = i < fields.Count ? fields[i] : string.Empty;
+                string headerName = i < headers.Count && !string.IsNullOrWhiteSpace(headers[i])
+                    ? headers[i]
+                    : $"Column_{i + 1}";
+
+                string value = i < fields.Count ? fields[i] : string.Empty;
+                columns[headerName] = value;
             }
 
             rows.Add(new CsvRow(columns));
